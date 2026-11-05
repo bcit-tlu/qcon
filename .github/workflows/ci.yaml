@@ -1,0 +1,122 @@
+name: "[CI] Lint, build & publish"
+
+# PR runs show PR title; main runs show head commit subject.
+run-name: >-
+  ${{ github.event_name == 'pull_request'
+      && format('PR #{0} — {1}', github.event.pull_request.number, github.event.pull_request.title)
+      || format('Head build — {0}', github.event.head_commit.message) }}
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Default to least privilege; jobs elevate only when needed.
+permissions:
+  contents: read
+
+jobs:
+  # Chart quality gate: lint, render, and (optionally) schema-validate the Helm chart using the shared reusable workflow.
+  helm-lint:
+    uses: bcit-tlu/.github/.github/workflows/helm-lint.yaml@main
+    permissions:
+      contents: read
+    with:
+      chart_glob: "charts/"
+      extra_command: bash tests/helm-cdn-rewrite.sh
+
+  # Build, sign, scan, and publish the OCI image using the shared reusable workflow; also outputs an RC version for the chart publish step.
+  build-qcon:
+    uses: bcit-tlu/.github/.github/workflows/oci-build.yaml@main
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      security-events: write
+      actions: read
+    with:
+      component: qcon
+      image_name: qcon
+      context: .
+      tag_prefix: "v"
+      # PR builds publish sha-<head>/pr-<n> images for the flux-fleet-v2
+      # preview environment (label a PR `preview`).
+      push_pr_images: true
+    secrets: inherit
+
+  # Build the static site, verify dist/ is host-agnostic, and hash the uploaded file set into a content ref (latest channel). The Docker build happens separately in the build-qcon job.
+  build-assets:
+    if: github.event_name != 'pull_request'
+    uses: bcit-tlu/.github/.github/workflows/cdn-build-assets.yaml@main
+    permissions:
+      contents: read
+    with:
+      repo_name: ${{ github.event.repository.name }}
+      cdn_base_url: ${{ vars.CDN_BASE_URL_LATEST }}
+      asset_extensions: "css,js,map,jpg,jpeg,png,webp,gif,svg,ico,mp4,woff,woff2,ttf,otf,eot"
+
+  # Upload dist/ verbatim to the latest CDN account under the content-hash prefix and write the .by-commit/<sha> lookup for release-time promotion. Authenticates to Azure via OIDC (UAMI) — no SAS token. The 'latest' GitHub Environment is what the Azure federated credential trusts; without it the OIDC subject won't match and login will fail.
+  # AZURE_CLIENT_ID_LATEST is an environment-scoped secret, but secrets passed by name to a reusable workflow resolve in the *called* job's environment (the cdn-upload job sets environment: latest), so this mapping is correct — the caller having no environment is not a problem. CDN_* and AZURE_TENANT_ID/AZURE_SUBSCRIPTION_ID are org-level vars/secrets, so they resolve at caller scope too.
+  cdn-upload:
+    needs: build-assets
+    uses: bcit-tlu/.github/.github/workflows/cdn-upload.yaml@main
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      dist_dir: "dist"
+      artifact_name: "dist"
+      destination_prefix: ${{ needs.build-assets.outputs.destination_prefix }}
+      commit_sha: ${{ needs.build-assets.outputs.commit_sha }}
+      cdn_account_name: ${{ vars.CDN_ACCOUNT_NAME_LATEST }}
+      repo_name: ${{ github.event.repository.name }}
+      asset_extensions: ${{ needs.build-assets.outputs.asset_extensions }}
+      auth_mode: oidc
+      environment: latest
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_LATEST }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  # Remove old CDN ref prefixes from the latest container. Protected refs are tracked in .latest-current and .latest-history. Same OIDC auth as upload.
+  cdn-cleanup:
+    needs: [cdn-upload, build-assets]
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Azure login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_LATEST }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          allow-no-subscriptions: true
+
+      - uses: bcit-tlu/.github/.github/actions/cdn-cleanup@main
+        with:
+          cdn_account_name: ${{ vars.CDN_ACCOUNT_NAME_LATEST }}
+          channel: latest
+          repo_name: ${{ github.event.repository.name }}
+          ref: ${{ needs.build-assets.outputs.content_hash }}
+
+  # Package and push the Helm chart for the matching RC image. Runs on main pushes only; version comes from the oci-build reusable workflow.
+  helm-publish:
+    needs: [helm-lint, build-qcon, build-assets, cdn-upload]
+    if: >-
+      github.event_name != 'pull_request'
+      && needs.build-qcon.outputs.rc_version != ''
+    uses: bcit-tlu/.github/.github/workflows/helm-publish.yaml@main
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    with:
+      chart_dir: charts
+      version: ${{ needs.build-qcon.outputs.rc_version }}
+      cdn_content_ref: ${{ needs.build-assets.outputs.content_hash }}
+    secrets: inherit

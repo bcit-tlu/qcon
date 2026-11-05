@@ -1,0 +1,25 @@
+name: renovate
+
+# Self-hosted Renovate — runs on a schedule via the shared reusable workflow.
+# PRs are opened by github-actions[bot]; CI on those PRs needs one-time
+# approval from a write-access user (GitHub bot-PR security gate).
+
+on:
+  schedule:
+    # Every weekday at 09:30 PT (17:30 UTC)
+    - cron: '30 17 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: write
+  statuses: write
+  actions: write
+  security-events: read
+
+jobs:
+  renovate:
+    uses: bcit-tlu/.github/.github/workflows/renovate.yaml@main
+    secrets: inherit

@@ -1,0 +1,25 @@
+name: release-please
+
+on:
+  push:
+    branches: [main]
+
+# Default to least privilege; jobs elevate only when needed.
+permissions:
+  contents: read
+
+jobs:
+  # Run release-please on main: creates/updates the release PR and dispatches
+  # chart publish + image retag workflows when a release is merged.
+  release:
+    uses: bcit-tlu/.github/.github/workflows/release-please.yaml@main
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      actions: write        # for dispatch_workflows
+    with:
+      dispatch_workflows: |
+        helm-publish.yaml
+        release-retag.yaml
+    secrets: inherit

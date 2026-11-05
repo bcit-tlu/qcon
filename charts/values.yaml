@@ -1,0 +1,63 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/bcit-tlu/qcon/qcon
+  pullPolicy: IfNotPresent
+  tag: "" # Defaults to .Chart.AppVersion
+
+service:
+  type: ClusterIP
+  port: 8080
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []
+  tls: []
+
+probes:
+  liveness:
+    path: /healthz
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  readiness:
+    path: /healthz/ready
+    initialDelaySeconds: 3
+    periodSeconds: 5
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+# ── High-availability / topology spreading ────────────────────
+# When enabled, adds a required pod anti-affinity rule so that no two replicas land in the same topology zone (e.g. datacenter).
+# Requires nodes to be labeled with the chosen topologyKey.
+# NOTE: replicaCount must not exceed the number of distinct zones, otherwise excess pods will remain Pending (hard scheduling constraint).
+zoneAntiAffinity:
+  enabled: false
+  topologyKey: topology.kubernetes.io/zone
+
+# Deploy-time Azure CDN rewrite (initContainer).
+# When enabled, an initContainer builds an immutable CDN URL using the CI-injected content ref (baseUrl + /<Chart.Name>/<ref>), and rewrites relative asset URLs in HTML/CSS/JS files matching assetExtensions.
+cdn:
+  enabled: false
+  # CDN root domain (e.g. https://<hostname>.azurefd.net)
+  baseUrl: ""
+  # Asset extensions to rewrite to CDN (e.g. css,js,png,svg)
+  assetExtensions: []
+  # CDN content ref (dist content hash) — injected by CI at chart package time (do not set manually).
+  contentRef: ""
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

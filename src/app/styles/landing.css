@@ -1,0 +1,137 @@
+/* SPDX-License-Identifier: MPL-2.0 */
+/* Landing page: intro cards, dropzone, additional options. */
+
+.landing {
+  text-align: center;
+}
+
+.blurb {
+  margin-bottom: 1.5rem;
+}
+
+.blurb-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 1rem;
+}
+
+.blurb-card {
+  background: var(--card);
+  border-radius: 4px;
+  box-shadow:
+    0 2px 1px -1px rgba(0, 0, 0, 0.2),
+    0 1px 1px 0 rgba(0, 0, 0, 0.14),
+    0 1px 3px 0 rgba(0, 0, 0, 0.12);
+  padding: 1rem 0.5rem;
+  width: 85%;
+  margin: 0 auto;
+}
+
+.blurb-card p {
+  margin: 0.3rem 0;
+}
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 20px;
+  border: 2px dashed #b3b3b3;
+  border-radius: 2px;
+  background: #f2f2f2;
+  cursor: pointer;
+  transition: border-color 0.24s ease-in-out, background 0.24s ease-in-out;
+}
+
+.dropzone:hover,
+.dropzone:focus-visible {
+  border-color: #3399ff;
+}
+
+.dropzone.active {
+  border-color: #3399ff;
+  background: #cce6ff;
+}
+
+.dropzone.reject {
+  border-color: #ff1744;
+  background: #ffb3c2;
+}
+
+.staged-file {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.staged-file p {
+  margin: 0;
+}
+
+.options-form {
+  margin: 1rem auto 0;
+  width: fit-content;
+  min-width: 21rem;
+  max-width: 100%;
+  text-align: center;
+}
+
+.options-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: left;
+}
+
+.option-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.option-nested {
+  margin-left: 1.7em;
+  max-width: calc(100% - 1.7em);
+  box-sizing: border-box;
+}
+
+.option-desc {
+  margin: 0.2em 0 0 1.7em;
+  font-size: 0.85rem;
+  color: #52525b;
+  line-height: 1.35;
+}
+
+.folder-input {
+  width: 100%;
+  font-size: 0.9rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.privacy-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  color: #52525b;
+  font-size: 0.9rem;
+}
+
+.privacy-note svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+@media screen and (max-width: 500px) {
+  .blurb-grid {
+    grid-auto-flow: row;
+    grid-auto-rows: 1fr;
+  }
+}

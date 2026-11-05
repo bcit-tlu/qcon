@@ -1,0 +1,186 @@
+/* SPDX-License-Identifier: MPL-2.0 */
+/* Edit-all editor and question form: section cards, answers, rich-text fields. */
+
+.library-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.library-title {
+  width: 100%;
+  font-size: 1.1rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.section-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.section-head h3 {
+  margin: 0;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  flex: 1;
+}
+
+.section-title:hover,
+.section-title:focus {
+  border-color: var(--border);
+}
+
+fieldset.question {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+}
+
+fieldset.question legend {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0 0.25rem;
+}
+
+.kind-badge {
+  background: #e0e7ff;
+  color: #3730a3;
+  border-radius: 4px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.q-actions {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.q-actions button {
+  padding: 0.1rem 0.45rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0.5rem 0;
+}
+
+.grow {
+  flex: 1;
+}
+
+label.block {
+  display: block;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.answers {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.answer-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.answer-row > .rte-placeholder,
+.answer-row > .tox-tinymce {
+  flex: 1;
+  min-width: 0;
+}
+
+/* HugeRTE mounts a hidden textarea next to .tox-tinymce; keep it out of flex layout. */
+.question textarea {
+  position: absolute;
+}
+
+.answer-row .fb {
+  width: 180px;
+  font-size: 0.85rem;
+}
+
+.ord-num {
+  min-width: 1.5rem;
+  text-align: right;
+  color: #52525b;
+}
+
+.hint-line {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #52525b;
+}
+
+.extras {
+  margin-top: 0.5rem;
+}
+
+.add-question {
+  border-top: 1px dashed var(--border);
+  padding-top: 0.5rem;
+}
+
+/* lazy rich-text placeholder (mounted on click) */
+.rte-placeholder {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.45rem 0.6rem;
+  min-height: 100px;
+  background: #fff;
+  cursor: text;
+}
+
+.rte-placeholder.compact {
+  min-height: 2rem;
+}
+
+.rte-placeholder.empty {
+  color: #a1a1aa;
+}
+
+.rte-placeholder:hover {
+  border-color: var(--accent);
+}
+
+.rte-placeholder:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* kind-conversion confirmation modal */
+.confirm-modal h3 {
+  margin-top: 0;
+}
+
+.confirm-modal ul {
+  margin: 0.5rem 0;
+  padding-left: 1.25rem;
+  color: var(--danger);
+}

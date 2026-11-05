@@ -1,0 +1,28 @@
+name: ${APP_NAME:-qcon}
+
+# Run the production nginx image locally.
+# docker compose -f docker-compose.prod.yml up --build
+# open http://localhost:8080
+
+services:
+  app:
+    build:
+      context: .
+      platforms:
+        - linux/amd64
+        - linux/arm64
+
+    environment:
+      - NODE_ENV=production
+
+    ports:
+      - "8080:8080"
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

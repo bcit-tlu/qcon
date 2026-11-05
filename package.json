@@ -1,0 +1,40 @@
+{
+  "name": "qcon",
+  "version": "3.0.0-beta",
+  "description": "Convert, edit, and export question libraries: Word (.docx) <-> QTI/SCORM (D2L Brightspace), entirely in the browser.",
+  "license": "MPL-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "compact": "vite build --mode compact",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hugerte/hugerte-react": "^2.0.2",
+    "dompurify": "^3.4.17",
+    "fast-xml-parser": "^5.12.0",
+    "hugerte": "^1.0.15",
+    "jszip": "^3.10.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.3",
+    "@types/dompurify": "^3.2.0",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "happy-dom": "^21.0.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.6",
+    "vite-plugin-singlefile": "^2.3.4",
+    "vitest": "^5.1.0"
+  }
+}
