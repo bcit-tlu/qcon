@@ -77,6 +77,7 @@
 
 ## Development Workflow
 
+- Default PR loop (no need to be asked): after every push, wait until all checks — including Devin Review and github-code-quality — have finished, fix and resolve every thread (≤3 rounds), and only then report or admin-merge. An instruction to "admin-merge" never skips this wait.
 - Create feature branches from `main`
 - Use pull requests for code review
 - PR titles must follow conventional commit format (enforced by `pr-title-lint.yaml`)
