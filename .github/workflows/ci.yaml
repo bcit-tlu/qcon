@@ -10,7 +10,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, staging]
 
 # Default to least privilege; jobs elevate only when needed.
 permissions:
@@ -103,6 +103,17 @@ jobs:
           channel: latest
           repo_name: ${{ github.event.repository.name }}
           ref: ${{ needs.build-assets.outputs.content_hash }}
+
+  validate:
+    if: always()
+    needs: [helm-lint, build-qcon]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify all gates passed
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS" | jq -e 'to_entries | all(.value.result == "success")' >/dev/null
 
   # Package and push the Helm chart for the matching RC image. Runs on main pushes only; version comes from the oci-build reusable workflow.
   helm-publish:
